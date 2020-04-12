@@ -9,6 +9,8 @@
 let auth = require('./auth.js');
 let config = require('./config.js');
 
+let depfunc = require('./depfunc.js');
+
 const port = config.port;
 
 var options = {
@@ -25,7 +27,7 @@ server.use(restify.plugins.queryParser());
 
 // Sqlite setup
 const file = config.dbFilename;
-var db = new sqlite3.Database(file);
+var db = new sqlite3.Database(file, sqlite3.OPEN_READONLY);
 
 // Restify auth
 server.use(function(req, res, next) {
@@ -41,6 +43,7 @@ server.use(function(req, res, next) {
 server.get('/', function(req, res, next) { res.send(404); return next(false); });
 server.get('/lastname/:lastname', findLastName);
 server.get('/id/:id', findId);
+server.get('/report', generateReport);
 
 // API functions
 function findLastName(req, res, next) {
@@ -64,6 +67,13 @@ function findId(req, res, next) {
 	    	res.send({errors: [], meta: [], data: rows});
 	    }
 	});	
+	next();
+}
+
+function generateReport(req, res, next) {
+	depfunc.report(db).then((result) => {
+		res.send({errors: [], meta: [], data: result});
+	});
 	next();
 }
 

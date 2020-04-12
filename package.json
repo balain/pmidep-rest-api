@@ -23,6 +23,7 @@
   "homepage": "https://github.com/balain/pmidep-rest-api#readme",
   "dependencies": {
     "restify": "^8.5.1",
+    "source": "0.0.3",
     "sqlite3": "^4.1.1"
   }
 }
