@@ -5,6 +5,9 @@ config.js
 # Data
 data
 
+# Scratch
+test.js
+
 # Logs
 logs
 *.log

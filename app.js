@@ -36,10 +36,6 @@ server.use(
   }
 );
 
-// Sqlite setup
-const file = config.dbFilename;
-var db = new sqlite3.Database(file);
-
 // Restify auth
 server.use(function(req, res, next) {
 	if (req.query.a) {
@@ -77,44 +73,45 @@ server.get('/', function(req, res, next) { res.send(404); return next(false); })
 server.get('/lastname/:lastname', findLastName);
 server.get('/id/:id', findId);
 server.get('/report', generateReport);
+server.get('/reportSimple', generateReportSimple);
 
 // API functions
 function findLastName(req, res, next) {
-	var sql = "SELECT ID, FullName, FirstName, LastName, WTitle, PMPNumber, PMPDate, PMIJoinDate, PMIExpirationDate, PMIAutoRenewStatus, ChapterAutoRenewStatus, DataDate FROM latest_data WHERE LastName = '" + req.params.lastname + "'";
-	db.all(sql, function(err, rows) {
-		if (err) {
+	depfunc.findLastName(req.params.lastname)
+		.then(results => {
+	    	res.send({errors: [], meta: results.meta, data: results.data});
+		}).catch(err => {
 			res.send({errors: [err], meta: [], data: []});
-		} else {
-	    	res.send({errors: [], meta: [], data: rows});
-	    }
-	});	
+		})
 	next();
 }
 
 function findId(req, res, next) {
-	var sql = "SELECT * FROM latest_data WHERE ID = '" + req.params.id + "'";
-	db.all(sql, function(err, rows) {
-		if (err) {
-			res.send({errors: [err], meta: [], data: []});
-		} else {
-	    	res.send({errors: [], meta: [], data: rows});
-	    }
-	});	
+	depfunc.findId(req.params.id).then((result) => {
+			res.send({errors: [], meta: result.meta, data: result.data});
+		}).catch((err) => {
+	    	res.send({errors: [err], meta: [], data: []});
+		}
+	);
 	next();
 }
 
 function generateReport(req, res, next) {
-	depfunc.report(db).then((result) => {
+	depfunc.report().then((result) => {
 		res.send({errors: [], meta: [], data: result});
+	});
+	next();
+}
+function generateReportSimple(req, res, next) {
+	depfunc.reportSimple().then((results) => {
+		res.send({errors: [], meta: [], data: results});
 	});
 	next();
 }
 
 process.on('SIGINT', function() {
-	console.log("Caught interrupt signal. Closing database connection...");
-	db.close();
-	console.log("...done");
-	process.exit();
+	depfunc.closeDb()
+		.then(process.exit());
 })
 
 server.listen(port, () => {

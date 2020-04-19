@@ -22,9 +22,10 @@
   },
   "homepage": "https://github.com/balain/pmidep-rest-api#readme",
   "dependencies": {
+    "minimist": ">=0.2.1",
     "request": "^2.88.2",
     "restify": "^8.5.1",
-    "sqlite3": "^4.1.1",
-    "minimist": ">=0.2.1"
+    "source": "0.0.3",
+    "sqlite3": "^4.1.1"
   }
 }
