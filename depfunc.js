@@ -330,14 +330,17 @@ const simpleReportFunctions = [	runQuery("Total", SQL_TOTAL),
 								runQuery("SIGs Count", SQL_SIGSCOUNT),
 							];
 
-let priorReportSimple = false;
-let priorReport = false;
+// Force a refresh the first run
+let priorReportSimpleDate = new Date(2000, 0, 1);
+let priorReportSimpleData = "";
+let priorReportDate = new Date(2000, 0, 1);
+let priorReportData = "";
 
 module.exports.reportSimple = function() {
 	return new Promise(function(resolve, reject) {
-		if (priorReportSimple) {
+		if ((new Date() - priorReportSimple) < (1000*60*60*24)) {
 			console.log("Returning cached priorReportSimple");
-			resolve(priorReportSimple);
+			resolve(priorReportSimpleData);
 		} else {
 			console.log("Creating new reportSimple...");
 
@@ -364,7 +367,8 @@ module.exports.reportSimple = function() {
 							// response[i.caption] = i.data;
 						}
 					})
-					priorReportSimple = response;
+					priorReportSimpleData = response;
+					priorReportSimpleDate = new Date();
 					resolve(response);
 				}).catch(err => {
 					console.error(err);
@@ -377,9 +381,9 @@ module.exports.reportSimple = function() {
 
 module.exports.report = function() {
 	return new Promise(function(resolve, reject) {
-		if (priorReport) {
+		if ((new Date() - priorReportDate) < (1000*60*60*24)) {
 			console.log("Returning cached priorReport");
-			resolve(priorReport);
+			resolve(priorReportData);
 		} else {
 			console.log("Creating new report output...");
 
@@ -550,7 +554,8 @@ module.exports.report = function() {
 																																																																						result
 																																																																					) => {
 																																																																						responseData.Occupationcodes = result;
-																																																																						priorReport = responseData;
+																																																																						priorReportData = responseData;
+																																																																						priorReportDate = new Date();
 																																																																						resolve(
 																																																																							responseData
 																																																																						);
